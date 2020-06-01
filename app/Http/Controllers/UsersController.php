@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User; //对user模型声明
+use Auth;
 class UsersController extends Controller
 {
     //用户注册页面的请求指定给用户控制器的 create 方法进行处理
@@ -29,6 +30,7 @@ class UsersController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
+        Auth::login($user); //注册完后直接登陆
         session()->flash('success', '欢迎，您将在这里开启一段新的旅程~');
         return redirect()->route('users.show', [$user]);
     }

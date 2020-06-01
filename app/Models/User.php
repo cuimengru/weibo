@@ -37,11 +37,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    /*要交互的数据库表*/
-    protected $table = 'users';
-
-    /*对用户密码或其它敏感信息在用户实例通过数组或 JSON 显示时进行隐藏*/
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+    /*生成头像的 gravatar 方法*/
+    public function gravatar($size = '100')
+    {
+        $hash = md5(strtolower(trim($this->attributes['email'])));
+        return "http://www.gravatar.com/avatar/$hash?s=$size";
+    }
 }

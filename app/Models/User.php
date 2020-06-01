@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -35,5 +35,13 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+    ];
+
+    /*要交互的数据库表*/
+    protected $table = 'users';
+
+    /*对用户密码或其它敏感信息在用户实例通过数组或 JSON 显示时进行隐藏*/
+    protected $hidden = [
+        'password', 'remember_token',
     ];
 }

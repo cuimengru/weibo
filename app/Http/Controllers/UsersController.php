@@ -20,11 +20,13 @@ class UsersController extends Controller
 
     //创建用户，表单中store的提交方法
     public function store(Request $request){
+        //验证规则 validate
         $this->validate($request, [
             'name' => 'required|unique:users|max:50',
             'email' => 'required|email|unique:users|max:255',
             'password' => 'required|confirmed|min:6'
         ]);
+        //create创建
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -35,5 +37,27 @@ class UsersController extends Controller
         return redirect()->route('users.show', [$user]);
     }
 
+    //编辑表单，更新个人资料
+    public function edit(user $user){
+        return view('users.edit',compact('user'));
+    }
+
+    //处理更新个人资料的 update 方法
+    public function update(user $user,Request $request){
+        //验证规则 validate
+        $this->validate($request, [
+            'name' => 'required|max:50',
+            'password' => 'required|confirmed|min:6'
+        ]);
+        //update 更新
+        $data=[];
+        $data['name']=$request->name;
+        if($request->password){
+            $data['password'] = bcrypt($request->password);
+        }
+        $user->update($data);
+        session()->flash('success', '个人资料更新成功！');
+        return redirect()->route('users.show',$user);
+    }
 
 }

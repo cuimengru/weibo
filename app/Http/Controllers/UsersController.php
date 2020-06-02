@@ -7,6 +7,21 @@ use App\Models\User; //对user模型声明
 use Auth;
 class UsersController extends Controller
 {
+    /* 设置权限，用户只能编辑自己的资料
+     * 过滤未登录的用户，middleware方法接受两个参数，第一个为中间件的名称，第二个为要进行过滤的动作
+     * except 方法来设定指定动作
+     *
+     */
+    public function __construct()
+    {
+        $this->middleware('auth', [
+            'except' => ['show', 'create', 'store']
+        ]);
+        //只让未登录用户访问注册页面，guest属性设置
+        $this->middleware('guest', [
+            'only' => ['create']
+        ]);
+    }
     //用户注册页面的请求指定给用户控制器的 create 方法进行处理
     //创建用户的页面
     public function create(){
@@ -39,11 +54,15 @@ class UsersController extends Controller
 
     //编辑表单，更新个人资料
     public function edit(user $user){
+        //使用 authorize 方法来验证用户授权策略,authorize 方法接收两个参数，第一个为授权策略的名称，第二个为进行授权验证的数据
+        $this->authorize('update', $user);
         return view('users.edit',compact('user'));
     }
 
     //处理更新个人资料的 update 方法
     public function update(user $user,Request $request){
+        //使用 authorize 方法来验证用户授权策略
+        $this->authorize('update', $user);
         //验证规则 validate
         $this->validate($request, [
             'name' => 'required|max:50',

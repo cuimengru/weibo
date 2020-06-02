@@ -3,7 +3,7 @@
     <a class="navbar-brand" href="{{ route('home') }}">Weibo App</a>
     <ul class="navbar-nav justify-content-end">
       @if (Auth::check()) {{--用于判断用户是否登陆--}}
-        <li class="nav-item"><a class="nav-link" href="#">用户列表</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{route('users.index')}}">用户列表</a></li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {{ Auth::user()->name }}

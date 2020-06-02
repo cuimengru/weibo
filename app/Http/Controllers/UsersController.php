@@ -29,9 +29,12 @@ class UsersController extends Controller
         return view('users.create');
     }
 
-    //显示用户的信息
+    //显示用户的信息，并关联发布微博的条数及信息
     public function show(user $user){
-        return view('users.show',compact('user'));
+        $statuses = $user->statuses()
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        return view('users.show', compact('user', 'statuses'));
     }
 
     //创建用户，表单中store的提交方法

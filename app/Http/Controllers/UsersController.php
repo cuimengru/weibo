@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User; //对user模型声明
 use Auth;
+use Mail;
 class UsersController extends Controller
 {
     /* 设置权限，用户只能编辑自己的资料
@@ -15,7 +16,7 @@ class UsersController extends Controller
     public function __construct()
     {
         $this->middleware('auth', [
-            'except' => ['show', 'create', 'store','index']
+            'except' => ['show', 'create', 'store','index','confirmEmail']
         ]);
         //只让未登录用户访问注册页面，guest属性设置
         $this->middleware('guest', [
@@ -47,9 +48,36 @@ class UsersController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
-        Auth::login($user); //注册完后直接登陆
-        session()->flash('success', '欢迎，您将在这里开启一段新的旅程~');
-        return redirect()->route('users.show', [$user]);
+        //Auth::login($user); //注册完后直接登陆
+        //注册完后发送到邮箱验证, sendEmailConfirmationTo 方法，该方法将用于发送邮件给指定用户
+        $this->sendEmailConfirmationTo($user);
+        session()->flash('success', '验证邮件已发送到你的注册邮箱上，请注意查收。');
+        return redirect('/');
+    }
+
+    //sendEmailConfirmationTo 方法，该方法将用于发送邮件给指定用户
+    protected function sendEmailConfirmationTo($user){
+        $view = 'emails.confirm';
+        $data = compact('user');
+        $from = 'summer@example.com';
+        $name = 'Summer';
+        $to = $user->email;
+        $subject = "感谢注册 Weibo 应用！请确认你的邮箱。";
+        Mail::send($view,$data,function ($message) use ($from,$name,$to,$subject){
+            $message->from($from,$name)->to($to)->subject($subject);
+        });
+    }
+
+    //激活邮件功能
+    public function confirmEmail($token){
+        $user = User::where('activation_token',$token)->firstOrFail();
+
+        $user->activated = true;
+        $user->activation_token = null;
+        $user->save();
+        Auth::login($user);
+        session()->flash('success','恭喜你，激活成功！');
+        return redirect()->route('users.show',[$user]);
     }
 
     //编辑表单，更新个人资料

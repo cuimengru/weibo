@@ -60,7 +60,8 @@ class User extends Authenticatable
     */
     public function statuses()
     {
-        return $this->hasMany(Status::class);
+        //关联微博表
+        return $this->hasMany(Status::class);//Status指的是模型Status.php
     }
 
     /* feed 方法将当前用户发布过的所有微博从数据库中取出，并根据创建时间来倒序排序*/
@@ -68,5 +69,44 @@ class User extends Authenticatable
     {
         return $this->statuses()
             ->orderBy('created_at', 'desc');
+    }
+
+    //根据用户获取粉丝关系列表
+    public function followers()
+    {
+        return $this->belongsToMany(User::Class, 'followers', 'user_id', 'follower_id');
+    }
+
+    //获取用户关注人列表
+    public function followings()
+    {
+        return $this->belongsToMany(User::Class, 'followers', 'follower_id', 'user_id');
+    }
+
+    //关注
+    public function follow($user_ids){
+        if ( ! is_array($user_ids)) {
+            $user_ids = compact('user_ids');
+        }
+
+        //sync 方法不重复关注用户
+        $this->followings()->sync($user_ids, false);
+    }
+
+    //取消关注
+    public function unfollow($user_ids)
+    {
+        if ( ! is_array($user_ids)) {
+            $user_ids = compact('user_ids');
+        }
+
+        //detach 取消关注
+        $this->followings()->detach($user_ids);
+    }
+
+    //判断当前登录的 A用户是否关注了 B 用户， contains 方法来做判断
+    public function isFollowing($user_id)
+    {
+        return $this->followings->contains($user_id);
     }
 }
